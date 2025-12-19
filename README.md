@@ -82,7 +82,7 @@ ShortList/
    ```env
    PORT=5000
    NODE_ENV=development
-   MONGODB_URI=mongodb+srv://shortlist_user:RZ17wvFUkgPd076J@shortlist-cluster.softgwc.mongodb.net/shortlist_db?appName=shortlist-cluster
+   MONGODB_URI=mongodb+srv://<username>:<password>@<cluster>.mongodb.net/<database>?appName=<appname>
    JWT_SECRET=your_secure_jwt_secret_here
    FRONTEND_URL=http://localhost:3000
    ```
