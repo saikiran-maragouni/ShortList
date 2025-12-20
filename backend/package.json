@@ -8,7 +8,11 @@
     "start": "node server.js",
     "dev": "node --watch server.js"
   },
-  "keywords": ["recruitment", "ats", "mern"],
+  "keywords": [
+    "recruitment",
+    "ats",
+    "mern"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
@@ -17,6 +21,8 @@
     "dotenv": "^16.3.1",
     "cors": "^2.8.5",
     "jsonwebtoken": "^9.0.2",
-    "bcryptjs": "^2.4.3"
+    "bcryptjs": "^2.4.3",
+    "cloudinary": "^1.41.0",
+    "multer": "^1.4.5-lts.1"
   }
 }
