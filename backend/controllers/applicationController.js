@@ -123,11 +123,11 @@ export const getMyApplications = async (req, res) => {
 
         // Filter by status if provided
         if (status) {
-            const validStatuses = ['APPLIED', 'REVIEWING', 'SHORTLISTED', 'REJECTED', 'ACCEPTED'];
+            const validStatuses = ['APPLIED', 'SHORTLISTED', 'REJECTED', 'INTERVIEW', 'HIRED'];
             if (!validStatuses.includes(status.toUpperCase())) {
                 return res.status(400).json({
                     success: false,
-                    message: 'Invalid status. Must be one of: APPLIED, REVIEWING, SHORTLISTED, REJECTED, ACCEPTED',
+                    message: 'Invalid status. Must be one of: APPLIED, SHORTLISTED, REJECTED, INTERVIEW, HIRED',
                 });
             }
             query.status = status.toUpperCase();

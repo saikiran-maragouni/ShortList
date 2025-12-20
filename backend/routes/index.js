@@ -4,6 +4,7 @@ import protectedExample from './protectedExample.js';
 import jobRoutes from './jobRoutes.js';
 import publicJobRoutes from './publicJobRoutes.js';
 import applicationRoutes from './applicationRoutes.js';
+import recruiterApplicationRoutes from './recruiterApplicationRoutes.js';
 
 const router = express.Router();
 
@@ -43,6 +44,12 @@ router.use('/public/jobs', publicJobRoutes);
  * /api/applications/*
  */
 router.use('/applications', applicationRoutes);
+
+/**
+ * Recruiter application routes (RECRUITER only)
+ * /api/recruiter/applications/*
+ */
+router.use('/recruiter/applications', recruiterApplicationRoutes);
 
 /**
  * Protected example routes (for testing middleware)

@@ -24,7 +24,7 @@ const applicationSchema = new mongoose.Schema(
         status: {
             type: String,
             enum: {
-                values: ['APPLIED', 'REVIEWING', 'SHORTLISTED', 'REJECTED', 'ACCEPTED'],
+                values: ['APPLIED', 'SHORTLISTED', 'REJECTED', 'INTERVIEW', 'HIRED'],
                 message: 'Invalid application status',
             },
             default: 'APPLIED',
