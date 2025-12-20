@@ -29,8 +29,8 @@ export const getApplicationsForJob = async (req, res) => {
             });
         }
 
-        // Get optional status filter
-        const { status } = req.query;
+        // Get optional status filter and sort parameter
+        const { status, sortBy } = req.query;
         const query = { jobId };
 
         if (status) {
@@ -44,11 +44,17 @@ export const getApplicationsForJob = async (req, res) => {
             query.status = status.toUpperCase();
         }
 
+        // Determine sort order
+        let sortOptions = { appliedAt: -1 }; // Default: newest first
+        if (sortBy === 'atsScore') {
+            sortOptions = { atsScore: -1 }; // Highest score first
+        }
+
         // Fetch applications
         const applications = await Application.find(query)
             .populate('candidateId', 'name email')
             .populate('jobId', 'title location experience')
-            .sort({ appliedAt: -1 }); // Most recent first
+            .sort(sortOptions);
 
         res.status(200).json({
             success: true,

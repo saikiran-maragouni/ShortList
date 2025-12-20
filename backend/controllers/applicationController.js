@@ -1,6 +1,7 @@
 import Application from '../models/Application.js';
 import Job from '../models/Job.js';
 import { uploadResume } from '../utils/cloudinary.js';
+import { calculateATSScore } from '../services/atsScoring.js';
 
 /**
  * Apply to a job
@@ -54,12 +55,17 @@ export const applyToJob = async (req, res) => {
         // Upload resume to Cloudinary
         const resumeUrl = await uploadResume(req.file.buffer, candidateId);
 
+        // Calculate ATS score
+        const { atsScore, atsBreakdown } = await calculateATSScore(resumeUrl, job);
+
         // Create application
         const application = await Application.create({
             jobId,
             candidateId,
             resumeUrl,
             status: 'APPLIED',
+            atsScore,
+            atsBreakdown,
         });
 
         // Populate job and candidate details

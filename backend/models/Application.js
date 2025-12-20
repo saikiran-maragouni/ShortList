@@ -34,6 +34,16 @@ const applicationSchema = new mongoose.Schema(
             type: Date,
             default: Date.now,
         },
+        atsScore: {
+            type: Number,
+            default: 0,
+            min: 0,
+            max: 100,
+        },
+        atsBreakdown: {
+            type: mongoose.Schema.Types.Mixed,
+            default: {},
+        },
     },
     {
         timestamps: true, // Adds createdAt and updatedAt
