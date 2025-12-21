@@ -5,6 +5,7 @@ import jobRoutes from './jobRoutes.js';
 import publicJobRoutes from './publicJobRoutes.js';
 import applicationRoutes from './applicationRoutes.js';
 import recruiterApplicationRoutes from './recruiterApplicationRoutes.js';
+import profileRoutes from './profileRoutes.js';
 
 const router = express.Router();
 
@@ -49,7 +50,11 @@ router.use('/applications', applicationRoutes);
  * Recruiter application routes (RECRUITER only)
  * /api/recruiter/applications/*
  */
+// Recruiter Application Routes
 router.use('/recruiter/applications', recruiterApplicationRoutes);
+
+// Profile management
+router.use('/profile', profileRoutes);
 
 /**
  * Protected example routes (for testing middleware)

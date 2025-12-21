@@ -59,9 +59,21 @@ const MyApplications = () => {
                     applications.map((app) => (
                         <div key={app._id} className="application-card card">
                             <div className="app-header">
-                                <div>
-                                    <h2>{app.jobId.title}</h2>
-                                    <span className="recruiter-name">Applied on {new Date(app.appliedAt).toLocaleDateString()}</span>
+                                <div className="company-info">
+                                    {app.jobId.recruiterId?.companyProfile?.logo && (
+                                        <img
+                                            src={app.jobId.recruiterId.companyProfile.logo}
+                                            alt={app.jobId.recruiterId.companyProfile.companyName}
+                                            className="company-logo"
+                                        />
+                                    )}
+                                    <div className="title-and-company">
+                                        <h2>{app.jobId.title}</h2>
+                                        <span className="company-name">
+                                            {app.jobId.recruiterId?.companyProfile?.companyName || 'Unknown Company'}
+                                        </span>
+                                        <div className="app-date">Applied on {new Date(app.appliedAt).toLocaleDateString()}</div>
+                                    </div>
                                 </div>
                                 <div className={`status-badge ${getStatusClass(app.status)}`}>
                                     {app.status}

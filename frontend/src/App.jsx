@@ -7,9 +7,11 @@ import Register from './components/Auth/Register';
 import Home from './components/Shared/Home';
 import CandidateJobs from './components/Candidate/JobList';
 import CandidateApplications from './components/Candidate/MyApplications';
+import CandidateProfile from './components/Candidate/CandidateProfile';
 import RecruiterJobs from './components/Recruiter/MyJobs';
 import RecruiterJobForm from './components/Recruiter/JobForm';
 import RecruiterApplications from './components/Recruiter/Applications';
+import CompanyProfile from './components/Recruiter/CompanyProfile';
 import './App.css';
 
 function App() {
@@ -39,6 +41,14 @@ function App() {
                                 element={
                                     <ProtectedRoute requiredRole="CANDIDATE">
                                         <CandidateApplications />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/candidate/profile"
+                                element={
+                                    <ProtectedRoute requiredRole="CANDIDATE">
+                                        <CandidateProfile />
                                     </ProtectedRoute>
                                 }
                             />
@@ -73,6 +83,14 @@ function App() {
                                 element={
                                     <ProtectedRoute requiredRole="RECRUITER">
                                         <RecruiterApplications />
+                                    </ProtectedRoute>
+                                }
+                            />
+                            <Route
+                                path="/recruiter/profile"
+                                element={
+                                    <ProtectedRoute requiredRole="RECRUITER">
+                                        <CompanyProfile />
                                     </ProtectedRoute>
                                 }
                             />

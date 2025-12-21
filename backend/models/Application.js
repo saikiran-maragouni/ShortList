@@ -18,8 +18,11 @@ const applicationSchema = new mongoose.Schema(
         },
         resumeUrl: {
             type: String,
-            required: [true, 'Resume URL is required'],
             trim: true,
+        },
+        // Phase 10: Snapshot of the candidate's profile at the time of application
+        candidateProfileSnapshot: {
+            type: mongoose.Schema.Types.Mixed,
         },
         status: {
             type: String,

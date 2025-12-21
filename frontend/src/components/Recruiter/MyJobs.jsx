@@ -1,15 +1,35 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { recruiterJobsAPI } from '../../services/api';
+import { Link, useNavigate } from 'react-router-dom';
+import { recruiterJobsAPI, profileAPI } from '../../services/api';
 import './Recruiter.css';
 
 const MyJobs = () => {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
-        fetchJobs();
+        const checkProfileAndFetchJobs = async () => {
+            try {
+                // Phase 9: Enforce mandatory company profile
+                const profileRes = await profileAPI.getCompanyProfile();
+                if (!profileRes.data.data.companyName) {
+                    navigate('/recruiter/profile', {
+                        state: { message: 'Please complete your company profile before managing jobs.' }
+                    });
+                    return;
+                }
+
+                await fetchJobs();
+            } catch (err) {
+                console.error('Error initializing recruiter dashboard:', err);
+                setError('Failed to initialize dashboard.');
+                setLoading(false);
+            }
+        };
+
+        checkProfileAndFetchJobs();
     }, []);
 
     const fetchJobs = async () => {
@@ -44,72 +64,129 @@ const MyJobs = () => {
         }
     };
 
-    if (loading) return <div className="loading">Loading jobs...</div>;
+    // Calculate stats
+    const totalJobs = jobs.length;
+    const activeJobs = jobs.filter(job => job.status === 'ACTIVE').length;
+    const totalApplications = jobs.reduce((sum, job) => sum + (job.applicationCount || 0), 0);
+
+    if (loading) return <div className="loading">Loading dashboard...</div>;
 
     return (
         <div className="recruiter-container">
             <div className="page-header">
                 <div className="header-actions">
-                    <div>
-                        <h1>My Job Postings</h1>
-                        <p>Manage your job listings and view applications.</p>
+                    <div className="header-title-group">
+                        <h1>Recruiter Dashboard</h1>
+                        <p>Overview of your hiring pipeline</p>
                     </div>
-                    <Link to="/recruiter/jobs/new" className="btn btn-primary">
-                        + Post New Job
-                    </Link>
+                    <div className="header-buttons">
+                        <Link to="/recruiter/profile" className="btn btn-secondary header-btn">
+                            🏢 Company Info
+                        </Link>
+                        <Link to="/recruiter/jobs/new" className="btn btn-primary header-btn">
+                            + Post New Job
+                        </Link>
+                    </div>
                 </div>
             </div>
 
             {error && <div className="error-message">{error}</div>}
 
-            <div className="jobs-list">
-                {jobs.length === 0 ? (
-                    <div className="empty-state">
-                        <h3>You haven't posted any jobs yet.</h3>
-                        <p>Create your first job posting to start finding candidates.</p>
-                        <Link to="/recruiter/jobs/new" className="btn btn-primary">Post a Job</Link>
-                    </div>
-                ) : (
-                    jobs.map((job) => (
-                        <div key={job._id} className={`recruiter-job-card card ${job.status === 'CLOSED' ? 'closed' : ''}`}>
-                            <div className="job-content">
-                                <div className="job-info">
-                                    <h2>{job.title}</h2>
-                                    <div className="meta-info">
-                                        <span>{job.location}</span> •
-                                        <span> Posted {new Date(job.createdAt).toLocaleDateString()}</span> •
-                                        <span className={`status-label ${job.status.toLowerCase()}`}>
+            {/* Metrics Grid */}
+            <div className="dashboard-stats">
+                <div className="stat-card primary">
+                    <div className="stat-icon">📊</div>
+                    <div className="stat-title">Active Jobs</div>
+                    <div className="stat-value">{activeJobs}</div>
+                </div>
+                <div className="stat-card info">
+                    <div className="stat-icon">👥</div>
+                    <div className="stat-title">Total Applications</div>
+                    <div className="stat-value">{totalApplications}</div>
+                </div>
+                <div className="stat-card success">
+                    <div className="stat-icon">📝</div>
+                    <div className="stat-title">Total Posts</div>
+                    <div className="stat-value">{totalJobs}</div>
+                </div>
+            </div>
+
+            <div className="jobs-section-header">
+                <h2>Recent Job Postings</h2>
+            </div>
+
+            {jobs.length === 0 ? (
+                <div className="dashboard-empty">
+                    <h3>No jobs posted yet</h3>
+                    <p>Get started by creating your first job listing to attract top talent.</p>
+                    <Link to="/recruiter/jobs/new" className="btn btn-primary">Create Job Post</Link>
+                </div>
+            ) : (
+                <div className="jobs-table-container">
+                    <table className="jobs-table">
+                        <thead>
+                            <tr>
+                                <th>Job Title</th>
+                                <th>Posted Date</th>
+                                <th>Location</th>
+                                <th>Applications</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {jobs.map((job) => (
+                                <tr key={job._id}>
+                                    <td className="job-title-cell">
+                                        <h3>{job.title}</h3>
+                                        <span className="job-meta-cell">{job.experience ? `${job.experience.min}-${job.experience.max} yrs` : ''}</span>
+                                    </td>
+                                    <td>{new Date(job.createdAt).toLocaleDateString()}</td>
+                                    <td>{job.location}</td>
+                                    <td>
+                                        <strong>{job.applicationCount || 0}</strong> applicants
+                                    </td>
+                                    <td>
+                                        <span className={`status-badge ${job.status.toLowerCase()}`}>
                                             {job.status}
                                         </span>
-                                    </div>
-                                </div>
+                                    </td>
+                                    <td>
+                                        <div className="action-buttons">
+                                            <Link
+                                                to={`/recruiter/applications/${job._id}`}
+                                                className="btn btn-primary btn-sm"
+                                                title="View Applications"
+                                            >
+                                                View Apps
+                                            </Link>
 
-                                <div className="job-stats">
-                                    <div className="stat">
-                                        <span className="count">{job.applicationCount || 0}</span>
-                                        <span className="label">Applications</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="job-actions">
-                                <Link to={`/recruiter/applications/${job._id}`} className="btn btn-secondary action-btn">
-                                    View Applications
-                                </Link>
-
-                                {job.status === 'ACTIVE' && (
-                                    <button
-                                        onClick={() => handleStatusToggle(job._id, job.status)}
-                                        className="btn btn-danger action-btn"
-                                    >
-                                        Close Job
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-                    ))
-                )}
-            </div>
+                                            {job.status === 'ACTIVE' && (
+                                                <button
+                                                    onClick={() => handleStatusToggle(job._id, job.status)}
+                                                    className="btn btn-secondary btn-sm"
+                                                    title="Close Job"
+                                                >
+                                                    Close
+                                                </button>
+                                            )}
+                                            {job.status === 'CLOSED' && (
+                                                <button
+                                                    className="btn btn-secondary btn-sm"
+                                                    disabled
+                                                    style={{ opacity: 0.5, cursor: 'not-allowed' }}
+                                                >
+                                                    Closed
+                                                </button>
+                                            )}
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 };

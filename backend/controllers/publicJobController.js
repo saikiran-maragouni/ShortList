@@ -40,7 +40,7 @@ export const getActiveJobs = async (req, res) => {
 
         // Fetch jobs and populate only safe recruiter fields
         const jobs = await Job.find(query)
-            .populate('recruiterId', 'name') // Only include recruiter name, not email
+            .populate('recruiterId', 'name companyProfile') // Include company information
             .select('-__v') // Exclude version key
             .sort({ createdAt: -1 }); // Most recent first
 
@@ -65,7 +65,7 @@ export const getActiveJobs = async (req, res) => {
 export const getActiveJobById = async (req, res) => {
     try {
         const job = await Job.findById(req.params.id)
-            .populate('recruiterId', 'name') // Only include recruiter name
+            .populate('recruiterId', 'name companyProfile') // Include recruiter name and company profile
             .select('-__v');
 
         if (!job) {

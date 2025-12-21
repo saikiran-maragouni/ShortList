@@ -13,11 +13,11 @@ export const applyToJob = async (req, res) => {
         const { jobId } = req.params;
         const candidateId = req.user._id;
 
-        // Check if resume file is uploaded
-        if (!req.file) {
+        // Phase 10: Check if candidate has a completed profile
+        if (!req.user.candidateProfile || !req.user.candidateProfile.headline) {
             return res.status(400).json({
                 success: false,
-                message: 'Please upload your resume (PDF, DOC, or DOCX)',
+                message: 'Please complete your profile (at least a headline) before applying.',
             });
         }
 
@@ -52,25 +52,26 @@ export const applyToJob = async (req, res) => {
             });
         }
 
-        // Upload resume to Cloudinary
-        const resumeUrl = await uploadResume(req.file.buffer, candidateId);
+        // Phase 10: Calculate ATS score based on profile instead of resume
+        const { atsScore, atsBreakdown } = await calculateATSScore(req.user.candidateProfile, job);
 
-        // Calculate ATS score
-        const { atsScore, atsBreakdown } = await calculateATSScore(resumeUrl, job);
-
-        // Create application
+        // Create application with profile snapshot
         const application = await Application.create({
             jobId,
             candidateId,
-            resumeUrl,
             status: 'APPLIED',
             atsScore,
             atsBreakdown,
+            candidateProfileSnapshot: req.user.candidateProfile,
         });
 
         // Populate job and candidate details
         await application.populate([
-            { path: 'jobId', select: 'title location experience' },
+            {
+                path: 'jobId',
+                select: 'title location experience recruiterId',
+                populate: { path: 'recruiterId', select: 'companyProfile name' }
+            },
             { path: 'candidateId', select: 'name email' },
         ]);
 
@@ -142,7 +143,11 @@ export const getMyApplications = async (req, res) => {
 
         // Fetch applications
         const applications = await Application.find(query)
-            .populate('jobId', 'title location experience status')
+            .populate({
+                path: 'jobId',
+                select: 'title location experience status recruiterId',
+                populate: { path: 'recruiterId', select: 'companyProfile name' }
+            })
             .populate('candidateId', 'name email')
             .sort({ appliedAt: -1 }); // Most recent first
 
@@ -168,7 +173,11 @@ export const getMyApplications = async (req, res) => {
 export const getApplicationById = async (req, res) => {
     try {
         const application = await Application.findById(req.params.id)
-            .populate('jobId', 'title description location experience skills status')
+            .populate({
+                path: 'jobId',
+                select: 'title description location experience skills status recruiterId',
+                populate: { path: 'recruiterId', select: 'companyProfile name' }
+            })
             .populate('candidateId', 'name email');
 
         if (!application) {

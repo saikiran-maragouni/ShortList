@@ -40,6 +40,43 @@ const userSchema = new mongoose.Schema(
             required: [true, 'Role is required'],
             uppercase: true,
         },
+        // Phase 9: Company Profile for Recruiters
+        companyProfile: {
+            companyName: { type: String, trim: true },
+            website: { type: String, trim: true },
+            location: { type: String, trim: true },
+            description: { type: String, trim: true },
+            logo: { type: String, trim: true }, // URL to logo
+            industry: { type: String, trim: true },
+            employeeCount: { type: String, trim: true },
+        },
+        // Phase 10: Candidate Profile
+        candidateProfile: {
+            headline: { type: String, trim: true },
+            about: { type: String, trim: true },
+            skills: { type: [String], default: [] },
+            experience: [{
+                title: String,
+                company: String,
+                location: String,
+                startDate: Date,
+                endDate: Date,
+                current: Boolean,
+                description: String
+            }],
+            education: [{
+                school: String,
+                degree: String,
+                fieldOfStudy: String,
+                startDate: Date,
+                endDate: Date,
+                description: String
+            }],
+            links: [{
+                platform: String,
+                url: String
+            }]
+        },
     },
     {
         timestamps: true, // Adds createdAt and updatedAt

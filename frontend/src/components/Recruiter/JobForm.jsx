@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { recruiterJobsAPI } from '../../services/api';
+import { recruiterJobsAPI, profileAPI } from '../../services/api';
 import './Recruiter.css';
 
 const JobForm = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
+    const [pageLoading, setPageLoading] = useState(true);
     const [error, setError] = useState('');
 
     const [formData, setFormData] = useState({
@@ -18,6 +19,28 @@ const JobForm = () => {
         minSalary: '',
         maxSalary: ''
     });
+
+    useEffect(() => {
+        const checkProfile = async () => {
+            try {
+                const profileRes = await profileAPI.getCompanyProfile();
+                if (!profileRes.data.data.companyName) {
+                    navigate('/recruiter/profile', {
+                        state: { message: 'Please complete your company profile before posting a job.' }
+                    });
+                    return;
+                }
+                setPageLoading(false);
+            } catch (err) {
+                console.error('Error checking profile:', err);
+                // If it fails, we might want to let them through or block, 
+                // but usually better to block if it's mandatory
+                navigate('/recruiter/jobs');
+            }
+        };
+
+        checkProfile();
+    }, []);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -40,10 +63,10 @@ const JobForm = () => {
                     min: Number(formData.minExp),
                     max: Number(formData.maxExp)
                 },
-                salary: {
+                salary: (formData.minSalary && formData.maxSalary) ? {
                     min: Number(formData.minSalary),
                     max: Number(formData.maxSalary)
-                }
+                } : undefined
             };
 
             await recruiterJobsAPI.createJob(jobData);
@@ -54,6 +77,8 @@ const JobForm = () => {
             setLoading(false);
         }
     };
+
+    if (pageLoading) return <div className="loading">Loading...</div>;
 
     return (
         <div className="recruiter-container">
@@ -117,25 +142,23 @@ const JobForm = () => {
 
                     <div className="form-row">
                         <div className="form-group half">
-                            <label>Min Salary ($)</label>
+                            <label>Min Salary ($) <span className="optional-text">(Optional)</span></label>
                             <input
                                 type="number"
                                 name="minSalary"
                                 value={formData.minSalary}
                                 onChange={handleChange}
                                 min="0"
-                                required
                             />
                         </div>
                         <div className="form-group half">
-                            <label>Max Salary ($)</label>
+                            <label>Max Salary ($) <span className="optional-text">(Optional)</span></label>
                             <input
                                 type="number"
                                 name="maxSalary"
                                 value={formData.maxSalary}
                                 onChange={handleChange}
                                 min="0"
-                                required
                             />
                         </div>
                     </div>

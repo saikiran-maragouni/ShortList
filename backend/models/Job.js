@@ -53,6 +53,16 @@ const jobSchema = new mongoose.Schema(
                 },
             },
         },
+        salary: {
+            min: {
+                type: Number,
+                default: null
+            },
+            max: {
+                type: Number,
+                default: null
+            }
+        },
         recruiterId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: 'User',

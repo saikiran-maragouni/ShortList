@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { publicJobsAPI, applicationsAPI } from '../../services/api';
 import './Candidate.css';
 
@@ -8,8 +9,6 @@ const JobList = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [applyingJobId, setApplyingJobId] = useState(null);
-    const [resume, setResume] = useState(null);
-    const [uploadError, setUploadError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
 
     useEffect(() => {
@@ -42,138 +41,143 @@ const JobList = () => {
         }
     };
 
-    const handleApplyClick = (jobId) => {
-        setApplyingJobId(jobId);
-        setResume(null);
-        setUploadError('');
-        setSuccessMessage('');
-    };
-
-    const handleFileChange = (e) => {
-        const file = e.target.files[0];
-        if (file && file.type === 'application/pdf') {
-            setResume(file);
-            setUploadError('');
-        } else {
-            setResume(null);
-            setUploadError('Please select a PDF file.');
-        }
-    };
-
-    const submitApplication = async (e) => {
-        e.preventDefault();
-        if (!resume) {
-            setUploadError('Please upload a resume.');
-            return;
-        }
-
+    const handleApply = async (jobId) => {
         try {
+            setApplyingJobId(jobId);
             setLoading(true);
-            const formData = new FormData();
-            formData.append('resume', resume);
+            setError('');
 
-            await applicationsAPI.apply(applyingJobId, formData);
-            setSuccessMessage('Application submitted successfully!');
+            await applicationsAPI.apply(jobId);
+            setSuccessMessage('Application submitted successfully using your profile!');
 
             // Update local state to reflect application
-            setAppliedJobIds(prev => new Set(prev).add(applyingJobId));
-
-            setApplyingJobId(null);
+            setAppliedJobIds(prev => new Set(prev).add(jobId));
 
             // Clear success message after 3 seconds
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch (err) {
-            setUploadError(err.response?.data?.message || 'Failed to apply. You may have already applied.');
+            const msg = err.response?.data?.message || 'Failed to apply.';
+            setError(msg);
+            if (msg.includes('profile')) {
+                // We'll handle navigation to profile in the UI
+            }
         } finally {
             setLoading(false);
+            setApplyingJobId(null);
         }
     };
+
+    const [searchTerm, setSearchTerm] = useState('');
+    const [locationFilter, setLocationFilter] = useState('');
+
+    const filteredJobs = jobs.filter(job => {
+        const matchesSearch = job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            job.recruiterId.companyProfile?.companyName?.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesLocation = locationFilter ? job.location.toLowerCase().includes(locationFilter.toLowerCase()) : true;
+        return matchesSearch && matchesLocation;
+    });
 
     if (loading && jobs.length === 0) return <div className="loading">Loading jobs...</div>;
 
     return (
         <div className="candidate-container">
             <div className="page-header">
-                <h1>Open Positions</h1>
-                <p>Explore and apply to the latest opportunities.</p>
+                <h1>Find Your Next Role</h1>
+                <p>Browse thousands of job openings from top companies.</p>
+            </div>
+
+            <div className="search-container">
+                <div className="search-input-group">
+                    <span className="search-icon">🔍</span>
+                    <input
+                        type="text"
+                        placeholder="Search by job title or company..."
+                        className="search-input"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                </div>
+                <div className="filter-group">
+                    <select
+                        className="filter-select"
+                        value={locationFilter}
+                        onChange={(e) => setLocationFilter(e.target.value)}
+                    >
+                        <option value="">All Locations</option>
+                        <option value="Remote">Remote</option>
+                        <option value="Bangalore">Bangalore</option>
+                        <option value="Hyderabad">Hyderabad</option>
+                        <option value="Pune">Pune</option>
+                        <option value="Mumbai">Mumbai</option>
+                        <option value="Delhi">Delhi</option>
+                    </select>
+                </div>
             </div>
 
             {successMessage && <div className="success-message">{successMessage}</div>}
             {error && <div className="error-message">{error}</div>}
 
             <div className="jobs-grid">
-                {jobs.length === 0 ? (
-                    <div className="empty-state">No active jobs found. Check back soon!</div>
+                {filteredJobs.length === 0 ? (
+                    <div className="empty-state">
+                        <h3>No jobs found</h3>
+                        <p>Try adjusting your search criteria.</p>
+                    </div>
                 ) : (
-                    jobs.map((job) => (
-                        <div key={job._id} className="job-card card">
+                    filteredJobs.map((job) => (
+                        <div key={job._id} className="job-card">
                             <div className="job-header">
-                                <h2>{job.title}</h2>
-                                <span className="recruiter-name">By {job.recruiterId.name}</span>
+                                <div className="company-logo-placeholder">
+                                    {job.recruiterId.companyProfile?.logo ? (
+                                        <img
+                                            src={job.recruiterId.companyProfile.logo}
+                                            alt={job.recruiterId.companyProfile.companyName}
+                                            className="company-logo-img"
+                                        />
+                                    ) : (
+                                        job.recruiterId.companyProfile?.companyName?.charAt(0) || 'C'
+                                    )}
+                                </div>
+                                <div className="job-title-section">
+                                    <h2>{job.title}</h2>
+                                    <span className="company-name">
+                                        {job.recruiterId.companyProfile?.companyName || 'Confidential'}
+                                    </span>
+                                </div>
                             </div>
 
-                            <div className="job-details">
-                                <div className="detail-item">
-                                    <strong>Location:</strong> {job.location}
-                                </div>
-                                <div className="detail-item">
-                                    <strong>Experience:</strong> {job.experience ? `${job.experience.min}-${job.experience.max} years` : 'Not specified'}
-                                </div>
-                                {job.salary && (
-                                    <div className="detail-item">
-                                        <strong>Salary:</strong> ${job.salary.min?.toLocaleString()} - ${job.salary.max?.toLocaleString()}
-                                    </div>
-                                )}
+                            <div className="job-meta">
+                                <span className="meta-tag">📍 {job.location}</span>
+                                <span className="meta-tag">💼 {job.experience ? `${job.experience.min}-${job.experience.max} yrs` : 'Exp N/A'}</span>
                             </div>
 
                             <div className="job-description">
-                                <p>{job.description.length > 150 ? `${job.description.substring(0, 150)}...` : job.description}</p>
+                                <p>{job.description.length > 100 ? `${job.description.substring(0, 100)}...` : job.description}</p>
                             </div>
 
-                            <div className="job-skills">
-                                {job.skills.map((skill, index) => (
-                                    <span key={index} className="skill-tag">{skill}</span>
-                                ))}
-                            </div>
+                            <div className="job-footer">
+                                <div className="salary-tag">
+                                    {(job.salary && job.salary.min && job.salary.max)
+                                        ? `$${job.salary.min.toLocaleString()} - $${job.salary.max.toLocaleString()}`
+                                        : 'Salary not disclosed'}
+                                </div>
 
-                            {applyingJobId === job._id ? (
-                                <form onSubmit={submitApplication} className="apply-form">
-                                    <div className="file-input-group">
-                                        <label>Upload Resume (PDF only)</label>
-                                        <input
-                                            type="file"
-                                            accept="application/pdf"
-                                            onChange={handleFileChange}
-                                        />
-                                    </div>
-                                    {uploadError && <div className="error-text">{uploadError}</div>}
-                                    <div className="form-actions">
-                                        <button type="submit" className="btn btn-primary" disabled={!resume}>
-                                            Submit Application
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="btn btn-secondary"
-                                            onClick={() => setApplyingJobId(null)}
-                                        >
-                                            Cancel
-                                        </button>
-                                    </div>
-                                </form>
-                            ) : (
-                                appliedJobIds.has(job._id) ? (
-                                    <button disabled className="btn btn-secondary apply-btn applied">
-                                        Applied
+                                {error && error.includes('profile') && applyingJobId === job._id ? (
+                                    <Link to="/candidate/profile" className="apply-btn disabled">Complete Profile</Link>
+                                ) : appliedJobIds.has(job._id) ? (
+                                    <button disabled className="apply-btn applied">
+                                        ✓ Applied
                                     </button>
                                 ) : (
                                     <button
-                                        className="btn btn-primary apply-btn"
-                                        onClick={() => handleApplyClick(job._id)}
+                                        className="apply-btn primary"
+                                        onClick={() => handleApply(job._id)}
+                                        disabled={loading && applyingJobId === job._id}
                                     >
-                                        Apply Now
+                                        {loading && applyingJobId === job._id ? 'Applying...' : 'Quick Apply'}
                                     </button>
-                                )
-                            )}
+                                )}
+                            </div>
                         </div>
                     ))
                 )}

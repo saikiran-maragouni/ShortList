@@ -80,4 +80,11 @@ export const recruiterApplicationsAPI = {
         api.put(`/recruiter/applications/${applicationId}/status`, { status }),
 };
 
+export const profileAPI = {
+    getCompanyProfile: () => api.get('/profile/company'),
+    updateCompanyProfile: (data) => api.put('/profile/company', data),
+    getCandidateProfile: () => api.get('/profile/candidate'),
+    updateCandidateProfile: (data) => api.put('/profile/candidate', data),
+};
+
 export default api;

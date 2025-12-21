@@ -10,7 +10,7 @@ export const getApplicationsForJob = async (req, res) => {
     try {
         const { jobId } = req.params;
         const recruiterId = req.user._id;
-        console.log(`[DEBUG] getApplicationsForJob called for ${jobId} by ${recruiterId}`);
+
 
         // Find the job and verify ownership in one query for safety
         let job = await Job.findOne({ _id: jobId, recruiterId: recruiterId });

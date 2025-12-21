@@ -1,13 +1,20 @@
 import Job from '../models/Job.js';
+// Check for salary feature
 
 /**
  * Create a new job posting
  * POST /api/jobs
  * @access Private (RECRUITER only)
  */
-export const createJob = async (req, res) => {
+export const createJob = async (req, res, next) => {
     try {
-        const { title, description, skills, location, experience } = req.body;
+        const { title, description, skills, location, experience, salary } = req.body;
+
+        // Phase 9: Enforce mandatory company profile
+        if (!req.user.companyProfile || !req.user.companyProfile.companyName) {
+            res.status(400);
+            throw new Error('Please complete your company profile before posting a job');
+        }
 
         // Validate required fields
         if (!title || !description || !skills || !location || !experience) {
@@ -50,6 +57,10 @@ export const createJob = async (req, res) => {
                 min: experience.min,
                 max: experience.max,
             },
+            salary: salary ? {
+                min: salary.min,
+                max: salary.max
+            } : undefined,
             recruiterId: req.user._id, // From authenticate middleware
         });
 
@@ -239,6 +250,11 @@ export const updateJob = async (req, res) => {
         if (experience) {
             if (experience.min !== undefined) job.experience.min = experience.min;
             if (experience.max !== undefined) job.experience.max = experience.max;
+        }
+        if (req.body.salary) {
+            if (!job.salary) job.salary = {};
+            if (req.body.salary.min !== undefined) job.salary.min = req.body.salary.min;
+            if (req.body.salary.max !== undefined) job.salary.max = req.body.salary.max;
         }
 
         // Save updated job
