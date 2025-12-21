@@ -20,6 +20,16 @@ cloudinary.config({
  */
 export const uploadResume = (fileBuffer, candidateId) => {
     return new Promise((resolve, reject) => {
+        if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+            // Fallback for Development Mode
+            if (process.env.NODE_ENV === 'development') {
+                console.warn('⚠️ Cloudinary credentials missing. Using MOCK upload for development.');
+                // Use a real PDF sample for better preview experience
+                return resolve(`https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf`);
+            }
+            return reject(new Error('Cloudinary credentials are not configured in backend/.env'));
+        }
+
         const uploadStream = cloudinary.uploader.upload_stream(
             {
                 folder: 'shortlist/resumes',

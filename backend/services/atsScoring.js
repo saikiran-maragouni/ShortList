@@ -1,4 +1,4 @@
-import { extractResumeText } from './resumeExtractor.js';
+import { extractResumeText } from '../utils/resumeExtractor.js';
 
 /**
  * Calculate ATS score for an application
@@ -9,7 +9,14 @@ import { extractResumeText } from './resumeExtractor.js';
 export const calculateATSScore = async (resumeUrl, job) => {
     try {
         // Extract text from resume
-        const resumeText = await extractResumeText(resumeUrl);
+        let resumeText = '';
+        if (resumeUrl.includes('mock-url.com')) {
+            console.warn('⚠️ Using mock resume text for ATS scoring.');
+            resumeText = "EXPERIENCE: 5 years of experience in JavaScript, React, and Node.js. EDUCATION: Bachelor of Science in Computer Science.";
+        } else {
+            resumeText = await extractResumeText(resumeUrl);
+        }
+
         const resumeLower = resumeText.toLowerCase();
 
         // Initialize scores

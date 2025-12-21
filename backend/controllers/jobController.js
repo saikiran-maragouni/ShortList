@@ -103,10 +103,32 @@ export const getMyJobs = async (req, res) => {
             query.status = status.toUpperCase();
         }
 
-        // Fetch jobs
-        const jobs = await Job.find(query)
-            .populate('recruiterId', 'name email')
-            .sort({ createdAt: -1 }); // Most recent first
+        // Aggregation to get jobs + application count
+        const jobs = await Job.aggregate([
+            { $match: query },
+            {
+                $lookup: {
+                    from: 'applications',
+                    localField: '_id',
+                    foreignField: 'jobId',
+                    as: 'applications',
+                },
+            },
+            {
+                $addFields: {
+                    applicationCount: { $size: '$applications' },
+                },
+            },
+            {
+                $project: {
+                    applications: 0, // Remove the heavy array, keep only count
+                },
+            },
+            { $sort: { createdAt: -1 } },
+        ]);
+
+        // Manually populate recruiterId since aggregate doesn't support mongoose populate directly
+        await Job.populate(jobs, { path: 'recruiterId', select: 'name email' });
 
         res.status(200).json({
             success: true,
@@ -129,26 +151,30 @@ export const getMyJobs = async (req, res) => {
  */
 export const getJobById = async (req, res) => {
     try {
-        const job = await Job.findById(req.params.id).populate(
+        console.log(`[DEBUG] getJobById called for ${req.params.id} by user ${req.user._id}`);
+        // Check if the job belongs to the logged-in recruiter using a safe query
+        const job = await Job.findOne({ _id: req.params.id, recruiterId: req.user._id }).populate(
             'recruiterId',
             'name email'
         );
 
         if (!job) {
+            console.log(`[DEBUG] getJobById: Job not found or not owned by user`);
+            // If job specific to user not found, check if it exists at all (for 403 vs 404)
+            const jobExists = await Job.exists({ _id: req.params.id });
+            if (jobExists) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Access denied. You can only view your own jobs.',
+                });
+            }
             return res.status(404).json({
                 success: false,
                 message: 'Job not found',
             });
         }
 
-        // Check if the job belongs to the logged-in recruiter
-        if (!job.isOwnedBy(req.user._id)) {
-            return res.status(403).json({
-                success: false,
-                message: 'Access denied. You can only view your own jobs.',
-            });
-        }
-
+        console.log(`[DEBUG] getJobById: Success`);
         res.status(200).json({
             success: true,
             data: { job },

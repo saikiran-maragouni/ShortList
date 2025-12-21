@@ -10,22 +10,24 @@ export const getApplicationsForJob = async (req, res) => {
     try {
         const { jobId } = req.params;
         const recruiterId = req.user._id;
+        console.log(`[DEBUG] getApplicationsForJob called for ${jobId} by ${recruiterId}`);
 
-        // Find the job and verify ownership
-        const job = await Job.findById(jobId);
+        // Find the job and verify ownership in one query for safety
+        let job = await Job.findOne({ _id: jobId, recruiterId: recruiterId });
 
         if (!job) {
+            console.log(`[DEBUG] getApplicationsForJob: Job not found or not owned`);
+            // Check if job exists at all to return correct error status
+            const jobExists = await Job.exists({ _id: jobId });
+            if (jobExists) {
+                return res.status(403).json({
+                    success: false,
+                    message: 'Access denied. You can only view applications for your own jobs.',
+                });
+            }
             return res.status(404).json({
                 success: false,
                 message: 'Job not found',
-            });
-        }
-
-        // Check if the recruiter owns this job
-        if (job.recruiterId.toString() !== recruiterId.toString()) {
-            return res.status(403).json({
-                success: false,
-                message: 'Access denied. You can only view applications for your own jobs.',
             });
         }
 
@@ -55,6 +57,8 @@ export const getApplicationsForJob = async (req, res) => {
             .populate('candidateId', 'name email')
             .populate('jobId', 'title location experience')
             .sort(sortOptions);
+
+        console.log(`[DEBUG] Found ${applications.length} applications.`);
 
         res.status(200).json({
             success: true,

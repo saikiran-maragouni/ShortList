@@ -106,6 +106,7 @@ export const applyToJob = async (req, res) => {
             });
         }
 
+        console.error('Apply Error details:', error);
         res.status(500).json({
             success: false,
             message: 'Error submitting application',
