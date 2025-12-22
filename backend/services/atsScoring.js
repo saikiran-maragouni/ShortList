@@ -1,4 +1,4 @@
-import { extractResumeText } from '../utils/resumeExtractor.js';
+// import { extractResumeText } from '../utils/resumeExtractor.js';
 
 /**
  * Calculate ATS score for an application

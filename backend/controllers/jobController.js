@@ -162,7 +162,7 @@ export const getMyJobs = async (req, res) => {
  */
 export const getJobById = async (req, res) => {
     try {
-        console.log(`[DEBUG] getJobById called for ${req.params.id} by user ${req.user._id}`);
+        // console.log(`[DEBUG] getJobById called for ${req.params.id} by user ${req.user._id}`);
         // Check if the job belongs to the logged-in recruiter using a safe query
         const job = await Job.findOne({ _id: req.params.id, recruiterId: req.user._id }).populate(
             'recruiterId',
@@ -170,7 +170,7 @@ export const getJobById = async (req, res) => {
         );
 
         if (!job) {
-            console.log(`[DEBUG] getJobById: Job not found or not owned by user`);
+            // console.log(`[DEBUG] getJobById: Job not found or not owned by user`);
             // If job specific to user not found, check if it exists at all (for 403 vs 404)
             const jobExists = await Job.exists({ _id: req.params.id });
             if (jobExists) {
@@ -185,7 +185,7 @@ export const getJobById = async (req, res) => {
             });
         }
 
-        console.log(`[DEBUG] getJobById: Success`);
+        // console.log(`[DEBUG] getJobById: Success`);
         res.status(200).json({
             success: true,
             data: { job },

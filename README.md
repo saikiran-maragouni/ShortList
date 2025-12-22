@@ -1,6 +1,6 @@
 # 🎯 Shortlist - AI-Powered Recruitment & ATS Platform
 
-A modern, full-stack MERN application for recruitment and applicant tracking, featuring an **AI-powered ATS scoring engine** to help recruiters filter candidates efficiently.
+A modern, full-stack MERN application for recruitment and applicant tracking, featuring an **AI-powered ATS scoring engine** that matches candidate profiles to job descriptions instantly.
 
 ## 🚀 Features
 
@@ -8,16 +8,16 @@ A modern, full-stack MERN application for recruitment and applicant tracking, fe
 -   **Dashboard**: View active jobs, total applications, and recent activity.
 -   **Job Management**: Post, edit, and close job listings.
 -   **Application Tracking**: centralized view of all candidates for a job.
--   **ATS Scoring 🤖**: Automatically parses resumes (PDF) and scores them (0-100) based on:
+-   **ATS Scoring 🤖**: Automatically scores candidates (0-100) based on:
     -   Skill Match
     -   Experience Match
-    -   Keyword Frequency
     -   Profile Alignment
 -   **Status Workflow**: Move candidates through stages (Applied → Shortlisted → Interview → Hired).
 
 ### For Candidates 👨‍💻
 -   **Job Search**: Browse active job listings with filters (Location, Role, Skills).
--   **Easy Apply**: Submit text-based applications or upload resumes.
+-   **Profile Builder**: Create a rich profile with skills, experience, and education.
+-   **Easy Apply**: Apply to jobs with a single click using your profile.
 -   **Application Tracking**: Monitor the status of all submitted applications.
 -   **Smart Alerts**: duplicate application prevention and real-time status updates.
 
@@ -27,22 +27,21 @@ A modern, full-stack MERN application for recruitment and applicant tracking, fe
 -   **Backend**: Node.js, Express.js
 -   **Database**: MongoDB Atlas (Mongoose ODM)
 -   **Authentication**: JWT with Role-Based Access Control (RBAC)
--   **File Storage**: Cloudinary (Mock/Real)
--   **Parsing**: `pdf-parse` for resume text extraction
+-   **Deployment**: Ready for Vercel (Frontend) & Render (Backend)
 
 ## 📋 Project Status
 
-**Current Phase: Phase 8 - COMPLETE ✅**
+**Current Phase: Final Polish & Deployment ✅**
 
 All core modules are implemented and verified:
 1.  **Foundation**: Server & Client setup.
 2.  **Auth**: Secure Register/Login with BCrypt & JWT.
 3.  **Job System**: CRUD operations for jobs with ownership validation.
 4.  **Public View**: Optimized public job feed.
-5.  **Applications**: Robust application submission flow.
+5.  **Applications**: Profile-based application flow.
 6.  **Tracking**: Recruiter dashboard & candidate status updates.
-7.  **ATS Engine**: Intelligent scoring algorithm.
-8.  **Polish**: Frontend integration & deployment readiness.
+7.  **ATS Engine**: Intelligent scoring algorithm based on profile data.
+8.  **Polish**: Modern UI for Candidate/Recruiter portals and comprehensive text stack cleanup.
 
 ## 🚀 Getting Started
 
@@ -50,7 +49,6 @@ All core modules are implemented and verified:
 
 -   Node.js (v18+)
 -   MongoDB Atlas connection string
--   Cloudinary Account (Optional - supports mock mode)
 
 ### Backend Setup
 
@@ -64,9 +62,7 @@ All core modules are implemented and verified:
     PORT=5000
     MONGODB_URI=your_mongodb_connection_string
     JWT_SECRET=your_secure_secret
-    CLOUDINARY_CLOUD_NAME=your_cloud_name
-    CLOUDINARY_API_KEY=your_key
-    CLOUDINARY_API_SECRET=your_secret
+    FRONTEND_URL=http://localhost:5173
     ```
 3.  Start Server:
     ```bash
@@ -91,9 +87,8 @@ All core modules are implemented and verified:
 
 ## 🧪 Testing
 
--   **Candidate Flow**: Register as candidate -> View Jobs -> Apply.
--   **Recruiter Flow**: Register as recruiter -> Post Job -> View Applications -> Check ATS Scores.
--   **ATS**: Upload a PDF resume to see the auto-generated score.
+-   **Candidate Flow**: Register -> Build Profile -> View Jobs -> Apply.
+-   **Recruiter Flow**: Register -> Post Job -> View Applications -> Check ATS Scores.
 
 ## 📄 License
 

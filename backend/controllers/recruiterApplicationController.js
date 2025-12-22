@@ -16,7 +16,7 @@ export const getApplicationsForJob = async (req, res) => {
         let job = await Job.findOne({ _id: jobId, recruiterId: recruiterId });
 
         if (!job) {
-            console.log(`[DEBUG] getApplicationsForJob: Job not found or not owned`);
+            // console.log(`[DEBUG] getApplicationsForJob: Job not found or not owned`);
             // Check if job exists at all to return correct error status
             const jobExists = await Job.exists({ _id: jobId });
             if (jobExists) {
@@ -58,7 +58,7 @@ export const getApplicationsForJob = async (req, res) => {
             .populate('jobId', 'title location experience')
             .sort(sortOptions);
 
-        console.log(`[DEBUG] Found ${applications.length} applications.`);
+        // console.log(`[DEBUG] Found ${applications.length} applications.`);
 
         res.status(200).json({
             success: true,

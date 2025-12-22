@@ -142,23 +142,25 @@ const JobForm = () => {
 
                     <div className="form-row">
                         <div className="form-group half">
-                            <label>Min Salary ($) <span className="optional-text">(Optional)</span></label>
+                            <label>Min Salary (LPA) <span className="optional-text">(Optional)</span></label>
                             <input
                                 type="number"
                                 name="minSalary"
                                 value={formData.minSalary}
                                 onChange={handleChange}
                                 min="0"
+                                step="0.1"
                             />
                         </div>
                         <div className="form-group half">
-                            <label>Max Salary ($) <span className="optional-text">(Optional)</span></label>
+                            <label>Max Salary (LPA) <span className="optional-text">(Optional)</span></label>
                             <input
                                 type="number"
                                 name="maxSalary"
                                 value={formData.maxSalary}
                                 onChange={handleChange}
                                 min="0"
+                                step="0.1"
                             />
                         </div>
                     </div>

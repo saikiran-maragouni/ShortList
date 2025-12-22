@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { publicJobsAPI, applicationsAPI } from '../../services/api';
+import JobDetailModal from './JobDetailModal';
 import './Candidate.css';
 
 const JobList = () => {
@@ -67,6 +68,12 @@ const JobList = () => {
         }
     };
 
+    const [selectedJob, setSelectedJob] = useState(null);
+
+    const handleApplySuccess = (jobId) => {
+        setAppliedJobIds(prev => new Set(prev).add(jobId));
+    };
+
     const [searchTerm, setSearchTerm] = useState('');
     const [locationFilter, setLocationFilter] = useState('');
 
@@ -112,6 +119,15 @@ const JobList = () => {
                         <option value="Delhi">Delhi</option>
                     </select>
                 </div>
+
+                {selectedJob && (
+                    <JobDetailModal
+                        job={selectedJob}
+                        onClose={() => setSelectedJob(null)}
+                        isApplied={appliedJobIds.has(selectedJob._id)}
+                        onApplySuccess={handleApplySuccess}
+                    />
+                )}
             </div>
 
             {successMessage && <div className="success-message">{successMessage}</div>}
@@ -125,7 +141,11 @@ const JobList = () => {
                     </div>
                 ) : (
                     filteredJobs.map((job) => (
-                        <div key={job._id} className="job-card">
+                        <div
+                            key={job._id}
+                            className="job-card clickable-card"
+                            onClick={() => setSelectedJob(job)}
+                        >
                             <div className="job-header">
                                 <div className="company-logo-placeholder">
                                     {job.recruiterId.companyProfile?.logo ? (
@@ -139,7 +159,9 @@ const JobList = () => {
                                     )}
                                 </div>
                                 <div className="job-title-section">
-                                    <h2>{job.title}</h2>
+                                    <div className="job-title-link">
+                                        <h2>{job.title}</h2>
+                                    </div>
                                     <span className="company-name">
                                         {job.recruiterId.companyProfile?.companyName || 'Confidential'}
                                     </span>
@@ -158,24 +180,16 @@ const JobList = () => {
                             <div className="job-footer">
                                 <div className="salary-tag">
                                     {(job.salary && job.salary.min && job.salary.max)
-                                        ? `$${job.salary.min.toLocaleString()} - $${job.salary.max.toLocaleString()}`
+                                        ? `₹${job.salary.min.toLocaleString()} - ₹${job.salary.max.toLocaleString()} LPA`
                                         : 'Salary not disclosed'}
                                 </div>
 
-                                {error && error.includes('profile') && applyingJobId === job._id ? (
-                                    <Link to="/candidate/profile" className="apply-btn disabled">Complete Profile</Link>
-                                ) : appliedJobIds.has(job._id) ? (
+                                {appliedJobIds.has(job._id) ? (
                                     <button disabled className="apply-btn applied">
                                         ✓ Applied
                                     </button>
                                 ) : (
-                                    <button
-                                        className="apply-btn primary"
-                                        onClick={() => handleApply(job._id)}
-                                        disabled={loading && applyingJobId === job._id}
-                                    >
-                                        {loading && applyingJobId === job._id ? 'Applying...' : 'Quick Apply'}
-                                    </button>
+                                    <span className="status-text view-details">View Details &rarr;</span>
                                 )}
                             </div>
                         </div>

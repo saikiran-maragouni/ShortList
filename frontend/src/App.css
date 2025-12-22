@@ -12,6 +12,11 @@
     padding: var(--spacing-xl);
 }
 
+.full-width-content {
+    flex: 1;
+    width: 100%;
+}
+
 /* Utility Classes - Layout */
 .page-header {
     margin-bottom: var(--spacing-xl);

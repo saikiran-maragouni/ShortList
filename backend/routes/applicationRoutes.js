@@ -5,7 +5,7 @@ import {
     getApplicationById,
 } from '../controllers/applicationController.js';
 import { authenticate, authorize } from '../middleware/auth.js';
-import upload from '../middleware/upload.js';
+// import upload from '../middleware/upload.js';
 
 const router = express.Router();
 
@@ -22,7 +22,7 @@ router.post(
     '/:jobId/apply',
     authenticate,
     authorize('CANDIDATE'),
-    upload.single('resume'),
+    // upload.single('resume'),
     applyToJob
 );
 

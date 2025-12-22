@@ -7,12 +7,12 @@ import User from '../models/User.js';
  */
 export const authenticate = async (req, res, next) => {
     try {
-        console.log(`[DEBUG] Auth Middleware - Request: ${req.method} ${req.originalUrl}`);
+        // console.log(`[DEBUG] Auth Middleware - Request: ${req.method} ${req.originalUrl}`);
         // Get token from Authorization header
         const authHeader = req.headers.authorization;
 
         if (!authHeader || !authHeader.startsWith('Bearer ')) {
-            console.log('[DEBUG] Auth Middleware - No token provided');
+            // console.log('[DEBUG] Auth Middleware - No token provided');
             return res.status(401).json({
                 success: false,
                 message: 'Access denied. No token provided.',

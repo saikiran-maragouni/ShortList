@@ -1,6 +1,6 @@
 import Application from '../models/Application.js';
 import Job from '../models/Job.js';
-import { uploadResume } from '../utils/cloudinary.js';
+// import { uploadResume } from '../utils/cloudinary.js';
 import { calculateATSScore } from '../services/atsScoring.js';
 
 /**
